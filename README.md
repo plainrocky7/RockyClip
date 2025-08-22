@@ -22,12 +22,12 @@ It was created as a personal learning project to practice Go programming, clipbo
 ```bash
 git clone https://github.com/plainrocky7/RockyClip.git
 ```
-2. 
-Edit the config in main.go
-3. 
+2. Edit the config in main.go
+3. Build the file
 ```bash
 go build RockyClip
 ```
+Or run build.bat
 ## License
-This project is licensed under the MIT License. See Here For Details [MIT LICSENE](https://opensource.org/license/mit).
+This project is licensed under the MIT License. See Here For Details [MIT LICENSE](https://opensource.org/license/mit).
 
